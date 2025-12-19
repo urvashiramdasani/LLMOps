@@ -46,6 +46,100 @@
 
 - **Delay**: A Celery method to introduce artificial delays when executing tasks. Used to demonstrate asynchronous behavior since tasks return immediately.
 
+- **Airflow DAG (Directed Acyclic Graph)**: A collection of tasks with dependencies that are arranged in a way that prevents cycles in the graph. This allows Airflow to schedule tasks efficiently.
+```python
+from airflow import DAG
+
+dag = DAG(
+    'example_dag',
+    schedule_interval='0 0 * * *',
+    default_args={
+        'retries': 2
+    }
+)
+
+# Tasks would go here with dependencies set between them
+```
+
+- **Airflow Operator**: Represents a single, idempotent task in a workflow. Many operators come "out of the box" for common tasks.
+```python
+from airflow.operators.bash_operator import BashOperator
+
+run_this = BashOperator(
+    task_id='run_after_loop',
+    bash_command='echo 1',
+    dag=dag,
+)
+```
+
+- **Airflow Hook**: An interface to connect to external systems and services like databases, S3, etc. Commonly used by operators.
+```python
+from airflow.hooks.postgres_hook import PostgresHook
+
+hook = PostgresHook(postgres_conn_id='my_conn')
+rows = hook.get_records(...)
+```
+
+- **Airflow Backfill**: Ability to rerun previous DAG runs over a time period. Useful for testing pipelines with historical data.
+```bash
+# Rerun previous 5 days  
+airflow dags backfill example_dag --start-date 5
+```
+
+- **Airflow Trigger DAG**: Manually triggering a pipeline run outside of the scheduler. Useful for testing.
+```python
+execution_date = datetime(2023, 1, 1)
+dag.create_dagrun(
+    run_id='manual_trigger',
+    execution_date=execution_date  
+)
+```
+
+- **Airflow Sensor**: Waits for a certain condition before triggering task
+
+- **XCom**: Mechanism for tasks to communicate output to other tasks
+
+- **Airflow Variable**: Global variable store accessible across all DAGs
+
+- **Airflow Pipeline**: Sequence of operators linked via dependencies
+
+```python
+# Airflow Sensor
+from airflow.sensors.external_task_sensor import ExternalTaskSensor
+
+sensor = ExternalTaskSensor(
+    task_id='wait_for_upstream',
+    external_dag_id='upstream_dag',
+    external_task_id='task_to_wait_for', 
+    dag=dag
+)
+
+# XCom 
+task1 = PythonOperator(
+    task_id='generate_data', 
+    python_callable=generate, 
+    dag=dag
+)
+
+task2 = PythonOperator(  
+    task_id='print_data',
+    python_callable=print_data,
+    op_kwargs={'data': '{{ ti.xcom_pull(task_ids="generate_data") }}'}, 
+    dag=dag
+)
+
+# Airflow Variable
+from airflow.models import Variable
+
+data_source = Variable.get('data_source')
+
+# Airflow Hook 
+from airflow.hooks.postgres_hook import PostgresHook
+
+db_hook = PostgresHook(postgres_conn_id='data_db')
+rows = db_hook.get_records("SELECT * FROM my_table")
+```
+
 ## MySQL Commands
 **Export**: Save MySQL data externally. Useful for external processing or backup.
 ```
