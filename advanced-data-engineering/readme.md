@@ -140,6 +140,74 @@ db_hook = PostgresHook(postgres_conn_id='data_db')
 rows = db_hook.get_records("SELECT * FROM my_table")
 ```
 
+- **Vector database** - A database optimized for storing and querying vector representations of data. Allows fast approximate nearest neighbor search on high-dimensional vector spaces.
+
+- **Semantic search** - Searching based on the meaning and concepts of queries and documents, using vector embeddings to measure semantic similarity.
+
+- **Embedding model** - A neural network model that converts text into vector representations that encode semantic meaning. Used to embed queries and documents.
+
+- **Collection** - An organizing structure in a vector database that stores vectors along with metadata. Vectors are indexed and queried within a collection.
+
+- **Jaccard index** - A metric for comparing similarity and diversity of sample sets. Used as a distance function for searches in vector databases.
+
+- **Filter** - A parameter that allows narrowing down search results in a vector database based on metadata criteria.
+
+- **Benchmarking** - The process of measuring and assessing performance of a system under a controlled reproducible workload.
+```python
+import math
+
+# Jaccard index function
+def jaccard_index(set1, set2):
+    intersection = len(set1.intersection(set2))
+    union = len(set1.union(set2))
+    return intersection / union
+
+doc1 = {"machine", "learning"} 
+doc2 = {"artificial", "intelligence"}
+
+print(jaccard_index(doc1, doc2)) # 0.0 - no similarity
+
+doc3 = {"trees", "forests"}
+doc4 = {"plants", "parks"} 
+
+print(jaccard_index(doc3, doc4)) # 0.5 - some similarity
+```
+
+- **Graph database** - A database that uses graph structures with nodes, edges, and properties to represent and store connected data. Optimized for analyzing relationships.
+
+- **Node** - An entity in a graph database representing a person, place, thing, or concept. Has properties.
+
+- **Edge** - The relationship between two nodes in a graph database. Has properties.
+```python
+from collections import defaultdict
+
+# Graph using adjacency list  
+graph = defaultdict(list)  
+
+# Add nodes
+graph['Alice'].append({'age': 25})
+graph['Bob'].append({'age': 30})
+
+# Add edge
+graph['Alice'].append({'dest': 'Bob', 'weight': 5})  
+graph['Bob'].append({'dest': 'Alice', 'weight': 5})
+
+# Print nodes and edges
+print("Nodes:")
+print(dict(graph))
+print("\nEdges:") 
+print(graph['Alice']) 
+print(graph['Bob'])
+```
+
+- **Cypher** - A declarative query language used to efficiently traverse and query connected data in graph databases.
+
+- **Centrality** - A graph metric indicating the relative importance of a node based on how well it connects a graph.
+
+- **CLI (Command Line Interface)** - An interface to interact with a program by passing textual commands and arguments.
+
+- **Clap** - A Rust library to create command line interface applications with argument parsing.
+
 ## MySQL Commands
 **Export**: Save MySQL data externally. Useful for external processing or backup.
 ```
