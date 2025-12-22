@@ -208,6 +208,119 @@ print(graph['Bob'])
 
 - **Clap** - A Rust library to create command line interface applications with argument parsing.
 
+- **AWS CloudShell**: Browser-based shell environment for managing AWS resources. Provides CLI access and persistence.
+
+- **AWS CodeCatalyst**: Development environment for building serverless apps on AWS. Provides IDE, git support, and AWS integration.
+
+- **AWS CodeWhisperer**: Visual Studio Code extension that provides real-time code suggestions for AWS services. Helps improve developer productivity.
+
+- **DynamoDB**: Fully managed NoSQL database service from AWS for applications that need consistent, single-digit millisecond latency.
+
+- **create-table**: CLI command to create new DynamoDB table by specifying attributes, key schema, and provisioned throughput.
+
+- **batch-write-item**: CLI command to efficiently insert multiple items into a DynamoDB table in batches.
+
+- **query**: CLI command to retrieve items from a DynamoDB table using key values. Can filter results.
+
+- **Global Secondary Index (GSI)**: Allows querying a DynamoDB table on an alternate key, giving more flexibility.
+```python
+import boto3
+
+# Create DynamoDB client
+dynamodb = boto3.client('dynamodb')
+
+# Create table
+table_name = 'customers'
+create_table_response = dynamodb.create_table(
+    TableName=table_name,
+    AttributeDefinitions=[
+        {
+            'AttributeName': 'customer_id',
+            'AttributeType': 'N'
+        },
+    ],
+    KeySchema=[
+        {
+            'AttributeName': 'customer_id',
+            'KeyType': 'HASH'  
+        },
+    ],
+    ProvisionedThroughput={
+        'ReadCapacityUnits': 5,
+        'WriteCapacityUnits': 5
+    }
+)
+
+print(f"Table {table_name} created successfully")
+```
+
+```python
+# Batch write items
+import boto3
+
+dynamodb = boto3.client('dynamodb')
+
+with open('data.json') as json_file:
+    data = json.load(json_file)
+    
+dynamodb.batch_write_item(RequestItems={
+        'TableName': 'customers',
+        'PutRequest': data
+    })
+    
+print("Items batch written to table")
+```
+
+```python
+# Query items with filter    
+dynamodb = boto3.client('dynamodb')
+
+response = dynamodb.query(
+    TableName='customers',
+    KeyConditionExpression='customer_id = :v1',
+    FilterExpression='address = :v2',
+    ExpressionAttributeValues={
+        ':v1': {'N': '3'},
+        ':v2': {'S': '789 Elm St'}
+    }
+)
+
+print("Queried items:")
+print(response['Items'])
+```
+
+- **airflow.models.BaseOperator**: Base class that operators inherit from to acquire common methods and attributes. Used to define PythonOperator.
+
+- **PythonOperator**: Operator that executes Python code. Used to define virtual environment and persist dataset tasks.
+
+- **SqlAlchemy**: ORM (Object Relational Mapping) library that enables interaction with databases using Python. Used to connect to SQLite database.
+
+- **wine_dataset.csv**: CSV file containing wine data from Kaggle. Columns include name, grape, region, variety, rating, nodes.
+
+- **clean_dataset**: Transformed DataFrame output from get_dataset task. Passed as input to persist_dataset.
+```python
+from airflow.models import BaseOperator, PythonOperator
+
+# Define PythonOperator to run Python function
+@PythonOperator(task_id='clean_dataset', python_callable=clean_dataset_function, provide_context=True)
+def clean_dataset():
+    # Read csv and transform data
+    df = pd.read_csv('wine_dataset.csv') 
+    clean_df = transform_data(df)
+    return clean_df
+
+# Persist cleaned data to SQLite 
+import sqlalchemy
+engine = sqlalchemy.create_engine('sqlite:////tmp/wine_dataset.db') 
+
+@PythonOperator(task_id='persist_dataset', python_callable=persist_dataset_function, provide_context=True) 
+def persist_dataset(clean_dataset):
+    df = clean_dataset # Passed from previous task
+    df.to_sql('wine_data', engine, index=False) 
+    nodes_df = df[['nodes']]
+    nodes_df.to_sql('wine_nodes', engine, index=False)
+```
+
 ## MySQL Commands
 **Export**: Save MySQL data externally. Useful for external processing or backup.
 ```
